@@ -204,6 +204,12 @@
             transform: translateY(-1px);
         }
 
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .result {
             background: #f0fff4;
             border: 2px solid #68d391;
@@ -213,19 +219,39 @@
             display: none;
         }
 
+        .result.error {
+            background: #fff5f5;
+            border-color: #f56565;
+        }
+
         .result h3 {
             color: #2f855a;
             margin-bottom: 15px;
         }
 
-        .result pre {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
+        .result.error h3 {
+            color: #c53030;
+        }
+
+        .result p {
             color: #2d3748;
+            line-height: 1.6;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         @media (max-width: 768px) {
@@ -408,16 +434,13 @@
             </div>
 
             <div class="submit-section">
-                <button type="submit" class="submit-btn">✨ 맞춤 영양제 추천받기</button>
+                <button type="submit" class="submit-btn" id="submitBtn">✨ 맞춤 영양제 추천받기</button>
             </div>
         </form>
 
         <div class="result" id="result">
-            <h3>📋 설문 결과</h3>
-            <pre id="resultData"></pre>
-            <p style="margin-top: 15px; color: #666; font-size: 0.9rem;">
-                ℹ️ 이 데이터를 구글 시트에 수집하려면 Google Apps Script를 사용하여 웹앱을 만들고 연동하시면 됩니다.
-            </p>
+            <h3></h3>
+            <p></p>
         </div>
     </div>
 
@@ -428,6 +451,7 @@
                 const otherInput = document.getElementById('supplementOther');
                 if (this.value === '기타') {
                     otherInput.style.display = 'block';
+                    otherInput.focus();
                 } else {
                     otherInput.style.display = 'none';
                     otherInput.value = '';
@@ -436,14 +460,42 @@
         });
 
         // 폼 제출 처리
-        document.getElementById('nutritionForm').addEventListener('submit', function(e) {
+        document.getElementById('nutritionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const resultDiv = document.getElementById('result');
+            const resultTitle = resultDiv.querySelector('h3');
+            const resultText = resultDiv.querySelector('p');
+            
+            // 버튼 비활성화 및 로딩 표시
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '전송 중... <span class="loading"></span>';
             
             const formData = new FormData(this);
             const result = {
                 timestamp: new Date().toISOString(),
                 responses: {}
             };
+
+            // 모든 필수 항목이 선택되었는지 확인
+            const requiredFields = ['sleep', 'fatigue', 'meal', 'supplement'];
+            let allFieldsCompleted = true;
+            
+            for (const field of requiredFields) {
+                const value = formData.get(field);
+                if (!value) {
+                    allFieldsCompleted = false;
+                    break;
+                }
+            }
+            
+            if (!allFieldsCompleted) {
+                alert('모든 필수 항목을 선택해주세요.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '✨ 맞춤 영양제 추천받기';
+                return;
+            }
 
             // 기본 응답 수집
             result.responses.sleep = formData.get('sleep') || '';
@@ -453,7 +505,7 @@
             // 영양제 응답 (기타 포함)
             const supplement = formData.get('supplement') || '';
             if (supplement === '기타') {
-                const otherValue = document.getElementById('supplementOther').value;
+                const otherValue = document.getElementById('supplementOther').value.trim();
                 result.responses.supplement = otherValue ? `기타: ${otherValue}` : '기타';
             } else {
                 result.responses.supplement = supplement;
@@ -463,59 +515,81 @@
             const healthAreas = formData.getAll('health');
             result.responses.healthAreas = healthAreas;
 
-            // 결과 표시
-            document.getElementById('resultData').textContent = JSON.stringify(result, null, 2);
-            document.getElementById('result').style.display = 'block';
-            
-            // 결과로 스크롤
-            document.getElementById('result').scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'center'
-            });
-
-            // 콘솔에도 출력 (개발자 도구에서 확인 가능)
-            console.log('설문 결과:', result);
-            
             // Google Sheets에 데이터 전송
-            sendToGoogleSheets(result);
+            try {
+                await sendToGoogleSheets(result);
+                
+                // 성공 메시지
+                resultDiv.className = 'result';
+                resultDiv.style.display = 'block';
+                resultTitle.textContent = '✅ 설문이 성공적으로 제출되었습니다!';
+                resultText.innerHTML = '맞춤 영양제 추천을 위해 응답을 분석하고 있습니다.<br>추천 결과를 곧 받아보실 수 있습니다.';
+                
+                // 결과로 스크롤
+                resultDiv.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                
+                // 폼 리셋
+                setTimeout(() => {
+                    if (confirm('새로운 설문을 작성하시겠습니까?')) {
+                        this.reset();
+                        document.getElementById('supplementOther').style.display = 'none';
+                        resultDiv.style.display = 'none';
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                }, 2000);
+                
+            } catch (error) {
+                // 오류 메시지
+                resultDiv.className = 'result error';
+                resultDiv.style.display = 'block';
+                resultTitle.textContent = '❌ 제출 중 오류가 발생했습니다';
+                resultText.textContent = '잠시 후 다시 시도해주세요. 문제가 계속되면 관리자에게 문의해주세요.';
+                console.error('제출 오류:', error);
+            } finally {
+                // 버튼 복구
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '✨ 맞춤 영양제 추천받기';
+            }
         });
 
         // Google Sheets 연동 함수
         async function sendToGoogleSheets(data) {
-            // ⚠️ 여기에 Apps Script에서 복사한 웹앱 URL을 입력하세요
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbwng2LgU-E8ysD_b_rtzwPlApPX0aDN_c4-8as_N-FS04TQXJlOb2_huZnxyUJtHGtLtg/exec';
+            // ⚠️ 여기에 Apps Script 웹앱 URL을 입력하세요
+            const scriptUrl = 'YOUR_APPS_SCRIPT_URL_HERE';
             
             // URL이 설정되지 않은 경우
-            if (scriptUrl === 'https://script.google.com/macros/s/AKfycbwng2LgU-E8ysD_b_rtzwPlApPX0aDN_c4-8as_N-FS04TQXJlOb2_huZnxyUJtHGtLtg/exec) {
-                alert('⚠️ Google Apps Script URL이 설정되지 않았습니다.\n개발자 도구(F12)에서 설정 방법을 확인하세요.');
-                console.log('🔧 Google Apps Script 설정 방법:');
-                console.log('1. Google Drive → Apps Script 프로젝트 생성');
-                console.log('2. 코드 작성 후 웹앱으로 배포');
-                console.log('3. 생성된 URL을 scriptUrl 변수에 입력');
-                console.log('현재 수집된 데이터:', data);
-                return;
+            if (scriptUrl === 'YOUR_APPS_SCRIPT_URL_HERE' || !scriptUrl) {
+                throw new Error('Google Apps Script URL이 설정되지 않았습니다.');
             }
             
+            console.log('📤 데이터 전송 중...', data);
+            
+            const response = await fetch(scriptUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const text = await response.text();
+            console.log('📥 응답:', text);
+            
+            // 응답 파싱 시도
             try {
-                console.log('📤 Google Sheets로 데이터 전송 중...');
-                
-                const response = await fetch(scriptUrl, {
-                    method: 'POST',
-                    mode: 'no-cors', // CORS 문제 해결
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                console.log('📥 응답 받음:', response);
-                alert('✅ 응답이 성공적으로 저장되었습니다!\n구글 시트를 확인해보세요.');
-                
-            } catch (error) {
-                console.error('❌ 저장 실패:', error);
-                console.log('🔍 전송하려던 데이터:', data);
-                alert('❌ 저장 중 오류가 발생했습니다.\n데이터는 화면에 표시되었으니 수동으로 복사할 수 있습니다.');
+                const result = JSON.parse(text);
+                if (!result.success) {
+                    throw new Error(result.message || '알 수 없는 오류');
+                }
+            } catch (e) {
+                // JSON 파싱 실패해도 성공으로 간주 (Apps Script 특성)
+                console.log('응답 파싱 실패, 하지만 전송은 성공했을 가능성이 높습니다.');
             }
+            
+            return true;
         }
     </script>
 </body>
