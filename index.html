@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>맞춤 영양제 추천 설문지</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .form-content {
+            padding: 40px 30px;
+        }
+
+        .question {
+            margin-bottom: 40px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .question:nth-child(1) { animation-delay: 0.1s; }
+        .question:nth-child(2) { animation-delay: 0.2s; }
+        .question:nth-child(3) { animation-delay: 0.3s; }
+        .question:nth-child(4) { animation-delay: 0.4s; }
+        .question:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 0.9rem;
+        }
+
+        .options {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option {
+            position: relative;
+        }
+
+        .option input[type="radio"],
+        .option input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .option label {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .option label:hover {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .option input:checked + label {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .option label::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #cbd5e0;
+            border-radius: 50%;
+            margin-right: 15px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .checkbox-option label::before {
+            border-radius: 4px;
+        }
+
+        .option input:checked + label::before {
+            background: white;
+            border-color: white;
+            box-shadow: inset 0 0 0 3px #667eea;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-top: 10px;
+            transition: border-color 0.3s ease;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .submit-section {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .result {
+            background: #f0fff4;
+            border: 2px solid #68d391;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .result h3 {
+            color: #2f855a;
+            margin-bottom: 15px;
+        }
+
+        .result pre {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #2d3748;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-content {
+                padding: 30px 20px;
+            }
+            
+            .question-title {
+                font-size: 1.1rem;
+            }
+            
+            .option label {
+                padding: 12px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 맞춤 영양제 추천</h1>
+            <p>친구를 위한 맞춤형 영양제를 추천해드립니다</p>
+        </div>
+        
+        <form class="form-content" id="nutritionForm">
+            <!-- 질문 1 -->
+            <div class="question">
+                <div class="question-title">
+                    <span class="question-number">1</span>
+                    하루 평균 수면 시간은 어떻게 되나요?
+                </div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" id="sleep1" name="sleep" value="3시간 이하">
+                        <label for="sleep1">3시간 이하</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="sleep2" name="sleep" value="4~5시간">
+                        <label for="sleep2">4~5시간</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="sleep3" name="sleep" value="6~7시간">
+                        <label for="sleep3">6~7시간</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="sleep4" name="sleep" value="8시간 이상">
+                        <label for="sleep4">8시간 이상</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 질문 2 -->
+            <div class="question">
+                <div class="question-title">
+                    <span class="question-number">2</span>
+                    최근 피로감을 자주 느끼시나요?
+                </div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" id="fatigue1" name="fatigue" value="거의 없음">
+                        <label for="fatigue1">거의 없음</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="fatigue2" name="fatigue" value="가끔 있음">
+                        <label for="fatigue2">가끔 있음</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="fatigue3" name="fatigue" value="자주 피곤함">
+                        <label for="fatigue3">자주 피곤함</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="fatigue4" name="fatigue" value="항상 피로함">
+                        <label for="fatigue4">항상 피로함</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 질문 3 -->
+            <div class="question">
+                <div class="question-title">
+                    <span class="question-number">3</span>
+                    식사는 하루에 몇 끼 정도 하시며, 균형 잡힌 식사를 하나요?
+                </div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" id="meal1" name="meal" value="하루 1끼, 불규칙">
+                        <label for="meal1">하루 1끼, 불규칙</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="meal2" name="meal" value="하루 2끼, 대체로 간단히">
+                        <label for="meal2">하루 2끼, 대체로 간단히</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="meal3" name="meal" value="하루 3끼, 가공식품 위주">
+                        <label for="meal3">하루 3끼, 가공식품 위주</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="meal4" name="meal" value="하루 3끼, 야채·단백질 균형">
+                        <label for="meal4">하루 3끼, 야채·단백질 균형</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 질문 4 -->
+            <div class="question">
+                <div class="question-title">
+                    <span class="question-number">4</span>
+                    현재 복용 중인 영양제가 있나요?
+                </div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" id="supplement1" name="supplement" value="없음">
+                        <label for="supplement1">없음</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="supplement2" name="supplement" value="종합비타민">
+                        <label for="supplement2">종합비타민</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="supplement3" name="supplement" value="유산균">
+                        <label for="supplement3">유산균</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="supplement4" name="supplement" value="오메가3">
+                        <label for="supplement4">오메가3</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="supplement5" name="supplement" value="기타">
+                        <label for="supplement5">기타</label>
+                    </div>
+                </div>
+                <input type="text" class="text-input" id="supplementOther" placeholder="기타 영양제를 입력해주세요" style="display: none;">
+            </div>
+
+            <!-- 질문 5 -->
+            <div class="question">
+                <div class="question-title">
+                    <span class="question-number">5</span>
+                    다음 중 본인이 특히 신경 쓰고 싶은 건강 영역은 무엇인가요? (중복 선택 가능)
+                </div>
+                <div class="options">
+                    <div class="option checkbox-option">
+                        <input type="checkbox" id="health1" name="health" value="피로 회복 / 활력">
+                        <label for="health1">피로 회복 / 활력</label>
+                    </div>
+                    <div class="option checkbox-option">
+                        <input type="checkbox" id="health2" name="health" value="면역력">
+                        <label for="health2">면역력</label>
+                    </div>
+                    <div class="option checkbox-option">
+                        <input type="checkbox" id="health3" name="health" value="소화 / 장 건강">
+                        <label for="health3">소화 / 장 건강</label>
+                    </div>
+                    <div class="option checkbox-option">
+                        <input type="checkbox" id="health4" name="health" value="스트레스 / 수면">
+                        <label for="health4">스트레스 / 수면</label>
+                    </div>
+                    <div class="option checkbox-option">
+                        <input type="checkbox" id="health5" name="health" value="두뇌 집중력">
+                        <label for="health5">두뇌 집중력</label>
+                    </div>
+                    <div class="option checkbox-option">
+                        <input type="checkbox" id="health6" name="health" value="전반적인 영양 보충">
+                        <label for="health6">전반적인 영양 보충</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-section">
+                <button type="submit" class="submit-btn">✨ 맞춤 영양제 추천받기</button>
+            </div>
+        </form>
+
+        <div class="result" id="result">
+            <h3>📋 설문 결과</h3>
+            <pre id="resultData"></pre>
+            <p style="margin-top: 15px; color: #666; font-size: 0.9rem;">
+                ℹ️ 이 데이터를 구글 시트에 수집하려면 Google Apps Script를 사용하여 웹앱을 만들고 연동하시면 됩니다.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // 기타 영양제 입력 필드 표시/숨김
+        document.querySelectorAll('input[name="supplement"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const otherInput = document.getElementById('supplementOther');
+                if (this.value === '기타') {
+                    otherInput.style.display = 'block';
+                } else {
+                    otherInput.style.display = 'none';
+                    otherInput.value = '';
+                }
+            });
+        });
+
+        // 폼 제출 처리
+        document.getElementById('nutritionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const result = {
+                timestamp: new Date().toISOString(),
+                responses: {}
+            };
+
+            // 기본 응답 수집
+            result.responses.sleep = formData.get('sleep') || '';
+            result.responses.fatigue = formData.get('fatigue') || '';
+            result.responses.meal = formData.get('meal') || '';
+            
+            // 영양제 응답 (기타 포함)
+            const supplement = formData.get('supplement') || '';
+            if (supplement === '기타') {
+                const otherValue = document.getElementById('supplementOther').value;
+                result.responses.supplement = otherValue ? `기타: ${otherValue}` : '기타';
+            } else {
+                result.responses.supplement = supplement;
+            }
+
+            // 건강 영역 (다중 선택)
+            const healthAreas = formData.getAll('health');
+            result.responses.healthAreas = healthAreas;
+
+            // 결과 표시
+            document.getElementById('resultData').textContent = JSON.stringify(result, null, 2);
+            document.getElementById('result').style.display = 'block';
+            
+            // 결과로 스크롤
+            document.getElementById('result').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'center'
+            });
+
+            // 콘솔에도 출력 (개발자 도구에서 확인 가능)
+            console.log('설문 결과:', result);
+            
+            // 여기에 Google Sheets API 호출 코드를 추가할 수 있습니다
+            // sendToGoogleSheets(result);
+        });
+
+        // Google Sheets 연동 함수 (예시)
+        function sendToGoogleSheets(data) {
+            // Google Apps Script 웹앱 URL로 POST 요청
+            // const scriptUrl = 'YOUR_GOOGLE_SCRIPT_URL';
+            // 
+            // fetch(scriptUrl, {
+            //     method: 'POST',
+            //     body: JSON.stringify(data),
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     }
+            // })
+            // .then(response => response.json())
+            // .then(result => {
+            //     console.log('Google Sheets에 저장됨:', result);
+            // })
+            // .catch(error => {
+            //     console.error('저장 실패:', error);
+            // });
+        }
+    </script>
+</body>
+</html>
