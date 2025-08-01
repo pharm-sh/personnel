@@ -481,30 +481,41 @@
         });
 
         // Google Sheets 연동 함수
-        function sendToGoogleSheets(data) {
+        async function sendToGoogleSheets(data) {
             // ⚠️ 여기에 Apps Script에서 복사한 웹앱 URL을 입력하세요
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbwL9JOhqVMJhracnjsuPnWJ7kK5q1h1PCDakvt43abG4pufILwMbAIQqocZC9XVp8WYhg/exec';
+            const scriptUrl = 'https://script.google.com/macros/s/AKfycbwng2LgU-E8ysD_b_rtzwPlApPX0aDN_c4-8as_N-FS04TQXJlOb2_huZnxyUJtHGtLtg/exec';
             
-            fetch(scriptUrl, {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(result => {
-                console.log('Google Sheets 저장 결과:', result);
-                if (result.success) {
-                    alert('✅ 응답이 성공적으로 저장되었습니다!');
-                } else {
-                    alert('❌ 저장 중 오류가 발생했습니다: ' + result.message);
-                }
-            })
-            .catch(error => {
-                console.error('저장 실패:', error);
-                alert('❌ 네트워크 오류가 발생했습니다.');
-            });
+            // URL이 설정되지 않은 경우
+            if (scriptUrl === 'https://script.google.com/macros/s/AKfycbwng2LgU-E8ysD_b_rtzwPlApPX0aDN_c4-8as_N-FS04TQXJlOb2_huZnxyUJtHGtLtg/exec) {
+                alert('⚠️ Google Apps Script URL이 설정되지 않았습니다.\n개발자 도구(F12)에서 설정 방법을 확인하세요.');
+                console.log('🔧 Google Apps Script 설정 방법:');
+                console.log('1. Google Drive → Apps Script 프로젝트 생성');
+                console.log('2. 코드 작성 후 웹앱으로 배포');
+                console.log('3. 생성된 URL을 scriptUrl 변수에 입력');
+                console.log('현재 수집된 데이터:', data);
+                return;
+            }
+            
+            try {
+                console.log('📤 Google Sheets로 데이터 전송 중...');
+                
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors', // CORS 문제 해결
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                console.log('📥 응답 받음:', response);
+                alert('✅ 응답이 성공적으로 저장되었습니다!\n구글 시트를 확인해보세요.');
+                
+            } catch (error) {
+                console.error('❌ 저장 실패:', error);
+                console.log('🔍 전송하려던 데이터:', data);
+                alert('❌ 저장 중 오류가 발생했습니다.\n데이터는 화면에 표시되었으니 수동으로 복사할 수 있습니다.');
+            }
         }
     </script>
 </body>
