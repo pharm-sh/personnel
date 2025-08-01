@@ -62,6 +62,7 @@
         .question:nth-child(3) { animation-delay: 0.3s; }
         .question:nth-child(4) { animation-delay: 0.4s; }
         .question:nth-child(5) { animation-delay: 0.5s; }
+        .question:nth-child(6) { animation-delay: 0.6s; }
 
         @keyframes fadeInUp {
             to {
@@ -433,6 +434,36 @@
                 </div>
             </div>
 
+            <!-- 질문 6 추가 -->
+            <div class="question">
+                <div class="question-title">
+                    <span class="question-number">6</span>
+                    현재 키는 몇 cm인가요?
+                </div>
+                <div class="options">
+                    <div class="option">
+                        <input type="radio" id="height1" name="height" value="165">
+                        <label for="height1">165</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="height2" name="height" value="166">
+                        <label for="height2">166</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="height3" name="height" value="167">
+                        <label for="height3">167</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="height4" name="height" value="167.1">
+                        <label for="height4">167.1</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="height5" name="height" value="167.2">
+                        <label for="height5">167.2</label>
+                    </div>
+                </div>
+            </div>
+
             <div class="submit-section">
                 <button type="submit" class="submit-btn" id="submitBtn">✨ 맞춤 영양제 추천받기</button>
             </div>
@@ -478,8 +509,8 @@
                 responses: {}
             };
 
-            // 모든 필수 항목이 선택되었는지 확인
-            const requiredFields = ['sleep', 'fatigue', 'meal', 'supplement'];
+            // 모든 필수 항목이 선택되었는지 확인 (height 추가)
+            const requiredFields = ['sleep', 'fatigue', 'meal', 'supplement', 'height'];
             let allFieldsCompleted = true;
             
             for (const field of requiredFields) {
@@ -514,6 +545,9 @@
             // 건강 영역 (다중 선택)
             const healthAreas = formData.getAll('health');
             result.responses.healthAreas = healthAreas;
+            
+            // 키 추가
+            result.responses.height = formData.get('height') || '';
 
             // Google Sheets에 데이터 전송
             try {
@@ -565,7 +599,7 @@
         // Google Sheets 연동 함수
         async function sendToGoogleSheets(data) {
             // Apps Script 웹앱 URL
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbwsdmDqRJWm0a1kpxUvxpo4okw_2rqQ0_ChjN1fj7I7lFBoq3nrCo9y_IQqj33RvwtlGQ/exec';
+            const scriptUrl = 'https://script.google.com/macros/s/AKfycbwgMY30bcCf1_jKJjkvkM1iWg_LJG-ay4G3k-PBMNwXJmxx4IbQT8HfM3Nd1SZt1d48/exec';
             
             console.log('📤 데이터 전송 중...', data);
             
