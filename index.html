@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지유 아빠 맞춤 영양제 추천 설문지</title>
+    <title>맞춤 영양제 추천 설문지</title>
     <style>
         * {
             margin: 0;
@@ -476,29 +476,35 @@
             // 콘솔에도 출력 (개발자 도구에서 확인 가능)
             console.log('설문 결과:', result);
             
-            // 여기에 Google Sheets API 호출 코드를 추가할 수 있습니다
-            // sendToGoogleSheets(result);
+            // Google Sheets에 데이터 전송
+            sendToGoogleSheets(result);
         });
 
-        // Google Sheets 연동 함수 (예시)
+        // Google Sheets 연동 함수
         function sendToGoogleSheets(data) {
-            // Google Apps Script 웹앱 URL로 POST 요청
-            // const scriptUrl = 'YOUR_GOOGLE_SCRIPT_URL';
-            // 
-            // fetch(scriptUrl, {
-            //     method: 'POST',
-            //     body: JSON.stringify(data),
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     }
-            // })
-            // .then(response => response.json())
-            // .then(result => {
-            //     console.log('Google Sheets에 저장됨:', result);
-            // })
-            // .catch(error => {
-            //     console.error('저장 실패:', error);
-            // });
+            // ⚠️ 여기에 Apps Script에서 복사한 웹앱 URL을 입력하세요
+            const scriptUrl = 'https://script.google.com/macros/s/AKfycbwL9JOhqVMJhracnjsuPnWJ7kK5q1h1PCDakvt43abG4pufILwMbAIQqocZC9XVp8WYhg/exec';
+            
+            fetch(scriptUrl, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Google Sheets 저장 결과:', result);
+                if (result.success) {
+                    alert('✅ 응답이 성공적으로 저장되었습니다!');
+                } else {
+                    alert('❌ 저장 중 오류가 발생했습니다: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('저장 실패:', error);
+                alert('❌ 네트워크 오류가 발생했습니다.');
+            });
         }
     </script>
 </body>
